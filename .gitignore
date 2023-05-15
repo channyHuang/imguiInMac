@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+**/build/
+**/Debug/
+**/Release/
+**/*.user
+**/*.suo
+**/*.db
+**/*.ipch
+
+*DS_Store

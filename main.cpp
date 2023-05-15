@@ -6,6 +6,7 @@
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 static void glfw_error_callback(int error, const char* description)
@@ -13,9 +14,31 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+GLuint program;
+const int numOfVao = 1;
+GLuint vao[numOfVao];
+
+GLuint createShaderProgram() {
+    const char* vshaderStr = "";
+    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vshader, 1, &vshaderStr, nullptr);
+    glCompileShader(vshader);
+
+    program = glCreateProgram();
+    glAttachShader(program, vshader);
+    glLinkProgram(program);
+
+    return program;
+}
+
+void init(GLFWwindow* window) {
+    createShaderProgram();
+
+}
+
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    //QCoreApplication a(argc, argv);
 
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -39,15 +62,16 @@ int main(int argc, char *argv[])
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
 
-    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    glewInit();
+
+    char sFileName[120] = {0};
 
     while (!glfwWindowShouldClose(window))
     {
@@ -64,12 +88,17 @@ int main(int argc, char *argv[])
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("Hello, world!");
+            ImGui::InputTextWithHint("file name", "(.obj .ply)", sFileName, 120, ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::SameLine();
+            if (ImGui::Button("Open File")) {
+                // to do
+            }
 
             ImGui::End();
         }
 
-
+        init(window);
 
         // Rendering
         ImGui::Render();
@@ -79,6 +108,8 @@ int main(int argc, char *argv[])
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        glDrawArrays(GL_POINTS, 0, 1);
 
         glfwSwapBuffers(window);
     }
@@ -90,5 +121,6 @@ int main(int argc, char *argv[])
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    return a.exec();
+    //return a.exec();
+    return 0;
 }
